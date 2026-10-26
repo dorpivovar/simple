@@ -2,6 +2,7 @@ import express from 'express';
 import { existsSync } from 'node:fs';
 import { loadEnvFile } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { TOOLS } from './tools.js';
 
 // Можно использовать свой simple/.env или уже настроенный .env старого проекта.
 const localEnv = new URL('./.env', import.meta.url);
@@ -27,12 +28,12 @@ app.use(express.static(fileURLToPath(new URL('./public', import.meta.url))));
 
 // Единственный API-маршрут: один запрос к Gemini, затем ответ браузеру.
 app.post('/api/chat', async (req, res) => {
-  const { message, cards, tools } = req.body || {};
+  const { message, cards } = req.body || {};
   if (typeof message !== 'string' || !message.trim() || message.length > 1000) {
     return res.status(400).json({ error: 'Введите команду от 1 до 1000 символов' });
   }
-  if (!Array.isArray(cards) || !Array.isArray(tools)) {
-    return res.status(400).json({ error: 'Не переданы задачи или описания функций' });
+  if (!Array.isArray(cards)) {
+    return res.status(400).json({ error: 'Не передан список задач' });
   }
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) return res.status(400).json({ error: 'Добавь GEMINI_API_KEY в .env и перезапусти сервер.' });
@@ -46,7 +47,7 @@ app.post('/api/chat', async (req, res) => {
         { text: `Текущие задачи: ${JSON.stringify(cards)}` },
         { text: `Команда пользователя: ${message.trim()}` },
       ] }],
-      tools: [{ functionDeclarations: tools }],
+      tools: [{ functionDeclarations: TOOLS }],
     }),
     signal: AbortSignal.timeout(90000),
   });

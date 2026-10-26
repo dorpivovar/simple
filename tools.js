@@ -1,4 +1,4 @@
-// Описания функций для Gemini. Сами функции находятся в app.js и выполняются в браузере.
+// Описания функций сервер передаёт Gemini. Реализации находятся в public/app.js.
 const status = { type: 'string', enum: ['todo', 'doing', 'done'] };
 const title = { type: 'string', minLength: 1, maxLength: 100 };
 const id = { type: 'string', description: 'Точный id из переданного списка задач' };

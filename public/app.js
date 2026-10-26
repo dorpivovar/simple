@@ -1,5 +1,3 @@
-import { TOOLS } from './tools.js';
-
 // Все задачи находятся в браузере. После перезагрузки страницы массив создаётся заново.
 let cards = [
   { id: crypto.randomUUID(), title: 'Выучить JavaScript', status: 'todo' },
@@ -139,16 +137,15 @@ chatForm.onsubmit = async event => {
   if (!command.value.trim()) { reply.dataset.state = 'error'; reply.textContent = 'Напиши команду.'; return; }
   send.disabled = true;
   command.readOnly = true;
-  chatForm.setAttribute('aria-busy', 'true');
   sendLabel.textContent = 'Выполняю…';
   reply.dataset.state = 'loading';
   reply.textContent = 'Gemini выбирает действие…';
   try {
-    // Единственный запрос: команда + текущие задачи + описания функций.
+    // Отправляем команду и текущие задачи. Описания функций добавит сервер.
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: command.value.trim(), cards, tools: TOOLS }),
+      body: JSON.stringify({ message: command.value.trim(), cards }),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error);
@@ -169,7 +166,6 @@ chatForm.onsubmit = async event => {
   } finally {
     send.disabled = false;
     command.readOnly = false;
-    chatForm.removeAttribute('aria-busy');
     sendLabel.textContent = 'Выполнить';
   }
 };
